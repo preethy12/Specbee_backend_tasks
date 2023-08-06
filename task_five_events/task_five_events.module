@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Task Five Events module.
+ */
+
+/**
+ * Implements hook_page_attachements_alter().
+ *
+ * Array $attachments.
+ */
+function task_five_events_page_attachments_alter(array &$attachments) {
+  foreach ($attachments['#attached']['html_head'] as $key => $attachment) {
+    if ($attachment[1] == 'system_meta_generator') {
+      unset($attachments['#attached']['html_head'][$key]);
+    }
+  }
+}
