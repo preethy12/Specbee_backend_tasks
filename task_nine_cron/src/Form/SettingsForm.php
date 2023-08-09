@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\mail_task_four\Form;
+namespace Drupal\task_nine_cron\Form;
 
 // Namespace.
 // Using base classes.
@@ -12,16 +12,16 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Class creation.
  */
-class ExampleForm extends ConfigFormBase {
+class SettingsForm extends ConfigFormBase {
 
   // It gives form id.
-  const RESULT = "ExampleForm.settings";
+  const RESULT = "task_nine_cron.settings";
 
   /**
    * To get form id.
    */
   public function getFormId() {
-    return "ExampleForm_settings";
+    return "task_nine_cron";
   }
 
   /**

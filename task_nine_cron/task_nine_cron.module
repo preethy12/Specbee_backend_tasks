@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * @file
+ * This function is used to send an email when a new log node is created.
+ */
+
+/**
+ * This function is used to send an email when a new log node is created.
+ *
+ * @param string $key
+ *   The key of the email message.
+ * @param array &$message
+ *   The email message array.
+ * @param array $params
+ *   The email message parameters.
+ */
+function task_nine_cron_mail($key, &$message, $params) {
+  // Set the content type of the email message.
+  $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+
+  // Switch on the email message key.
+  switch ($key) {
+    case 'log':
+      // Set the from address of the email message.
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+
+      // Set the subject of the email message.
+      $message['subject'] = $params['subject'];
+
+      // Set the body of the email message.
+      $message['body'][] = $params['text_area'];
+
+      break;
+  }
+}
+
+/**
+ * To send an email when a new log node is created.
+ */
+function task_nine_cron_cron() {
+  // Get the timestamp of the last cron run.
+  $lastCronRun = \Drupal::state()->get('lastcronrun');
+
+  // Get the current timestamp.
+  $currentTimestamp = \Drupal::time()->getCurrentTime();
+
+  // If the last cron run was more than 1 minute ago, or if there is no
+  // last cron run timestamp, run the cron job.
+  if (empty($lastCronRun) || ($currentTimestamp - $lastCronRun) >= 1) {
+    // Get a list of all log nodes that were created since the last cron run.
+    $query = \Drupal::entityQuery('node')->condition('type', 'logs')->condition('created', $lastCronRun, '>')->accessCheck(FALSE);
+    $nids = $query->execute();
+
+    // For each log node, send an email to the specified address.
+    foreach ($nids as $nid) {
+      // Load the log node.
+      $node = Node::load($nid);
+
+      // Get the email message and text body from the configuration.
+      $config = \Drupal::config('task_nine_cron.settings');
+      $messageTemplate = $config->get('subject');
+      $textTemplate = $config->get('text_area');
+
+      // Replace the tokens in the email message and text body with the values
+      // from the log node.
+      $tokenService = \Drupal::token();
+      $message = $tokenService->replace($messageTemplate, ['node' => $node], ['clear' => TRUE]);
+      $text = $tokenService->replace($textTemplate, ['node' => $node], ['clear' => TRUE]);
+
+      // Send the email.
+      $params = ['subject' => $message, 'text_area' => $text];
+      $module = 'task_nine_cron';
+      $key = 'log';
+      $to = 'preethyray12@gmail.com';
+      $langcode = \Drupal::currentUser()->getPreferredLangcode();
+      $mailManager = \Drupal::service('plugin.manager.mail');
+      $send = TRUE;
+      $result = $mailManager->mail($module, $key, $to, $langcode, $params, NULL, $send);
+
+      // If the email was not sent successfully, log an error message.
+      if ($result['result'] !== TRUE) {
+        \Drupal::messenger()->addMessage(t('There was a problem sending the email.'), 'error');
+      }
+      else {
+        \Drupal::messenger()->addMessage(t('Email has been sent successfully.'), 'status');
+      }
+    }
+
+    // Set the last cron run timestamp to the current timestamp.
+    \Drupal::state()->set('lastcronrun', $currentTimestamp);
+  }
+}

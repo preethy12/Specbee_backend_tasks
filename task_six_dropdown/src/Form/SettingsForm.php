@@ -74,7 +74,6 @@ class SettingsForm extends FormBase {
       '#prefix' => '<div id="model-wrapper">',
       '#suffix' => '</div>',
       '#empty_option' => '- Select -',
-      '#disabled' => FALSE,
       '#ajax' => [
         'callback' => [$this, 'ajaxColorDropdownCallback'],
         'wrapper' => 'color-wrapper',

@@ -11,10 +11,6 @@ use Drupal\Core\Entity\EntityInterface;
  * Implements hook_mail().
  */
 function mail_task_four_mail($key, &$message, $params) {
-  $options = [
-    'langcode' => $message['langcode'],
-  ];
-
   switch ($key) {
     case 'create_page':
       $message['from'] = \Drupal::config('system.site')->get('mail');
@@ -29,7 +25,7 @@ function mail_task_four_mail($key, &$message, $params) {
  */
 function mail_task_four_entity_insert(EntityInterface $entity) {
   // exit;.
-  if ($entity->getEntityTypeId() !== 'node' || ($entity->getEntityTypeId() === 'node' && $entity->bundle() !== 'page')) {
+  if ($entity->getEntityTypeId() != 'node') {
     return;
   }
 
@@ -49,7 +45,6 @@ function mail_task_four_entity_insert(EntityInterface $entity) {
 
   $params['subject'] = $sub_message;
   $params['text_area'] = $hlp;
-  // print_r(  $params['body']['value']);.
   $langcode = \Drupal::currentUser()->getPreferredLangcode();
   $send = TRUE;
 

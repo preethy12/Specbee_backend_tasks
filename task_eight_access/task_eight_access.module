@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Some desc.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * @file
+ * Primary module hooks for config_user module.
+ */
+
+/**
+ * Implements hook_entity_access() for nodes.
+ */
+function task_eight_access_node_access(nodeInterface $node, $op, AccountInterface $account) {
+
+  $config = \Drupal::config('task_eight_access.settings');
+  $selectedUserId = $config->get('roles');
+  // print_r($selectedUserId);exit;
+  $selectedContentTypeId = $config->get('content_types');
+  $userRoles = $account->getRoles();
+  // print_r($userRoles[1]);exit;
+  // print_r($selectedContentTypeId);exit;
+  // print_r($account->getRoles() );print_r($node->bundle());exit;
+  if (in_array($selectedUserId, $userRoles)  && in_array($node->bundle(), $selectedContentTypeId)) {
+    return AccessResult::allowed();
+  }
+  else {
+    return AccessResult::forbidden();
+  }
+}
